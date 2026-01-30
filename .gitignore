@@ -25,7 +25,7 @@ dist/
 build/
 
 # Large image assets
-API/dog-images/
+# API/dog-images/
 
 # Temporary uploads
 API/uploads/
