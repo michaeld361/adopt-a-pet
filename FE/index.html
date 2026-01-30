@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Who's your pet-a-likey? | Adopt a Pet</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script>
+        // Configure your API URL here for production
+        // window.API_BASE_URL = 'https://your-api-domain.com';
+    </script>
+</head>
+<body>
+    <div class="phone-frame">
+        <!-- Header -->
+        <header class="header">
+            <a href="#" class="logo" onclick="showPage('intro'); return false;">
+                <img src="images/logo.svg" alt="Adopt a Pet" class="logo-img">
+            </a>
+            <div class="header-actions">
+                <button class="sign-up-btn">Sign Up</button>
+                <button class="menu-btn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Screen 1: Introduction -->
+        <div id="intro-page" class="page active">
+            <div class="breadcrumb">
+                <a href="#">Home</a> / Who's your pet-alikey?
+            </div>
+            <h1 class="headline">Who's your<br>pet-alikey?</h1>
+            <p class="subtext">Take or upload a photo to find<br>your perfect partner</p>
+            <div class="intro-buttons">
+                <button class="start-btn" id="start-btn">Start</button>
+                <button class="view-matches-btn" id="view-matches-btn" style="display: none;">View Matches</button>
+            </div>
+            <div class="hero-container">
+                <img src="images/hero-combined.png" alt="White fluffy dog and smiling person" class="hero-combined">
+            </div>
+        </div>
+
+        <!-- Screen 2: Pet Type Selection -->
+        <div id="pet-type-page" class="page">
+            <h1 class="headline">One thing before we<br>get started</h1>
+            <p class="subtext">To help find the perfect pet-a-like let us know<br>what type of pet you would be open to adopting.</p>
+
+            <div class="pet-type-grid">
+                <button class="pet-type-card" data-pet="dogs">
+                    <div class="pet-type-icon">
+                        <img src="images/icon-dog.svg" alt="Dog">
+                    </div>
+                    <span class="pet-type-name">Dogs</span>
+                </button>
+
+                <button class="pet-type-card disabled" data-pet="cats">
+                    <div class="pet-type-icon">
+                        <img src="images/icon-cat.svg" alt="Cat">
+                    </div>
+                    <span class="pet-type-name">Cats</span>
+                </button>
+
+                <button class="pet-type-card disabled" data-pet="small">
+                    <div class="pet-type-icon">
+                        <img src="images/icon-rabbit.svg" alt="Rabbit">
+                    </div>
+                    <span class="pet-type-name">Small Animals</span>
+                </button>
+
+                <button class="pet-type-card disabled" data-pet="reptiles">
+                    <div class="pet-type-icon">
+                        <img src="images/icon-snake.svg" alt="Snake">
+                    </div>
+                    <span class="pet-type-name">Reptiles</span>
+                </button>
+
+                <button class="pet-type-card disabled" data-pet="birds">
+                    <div class="pet-type-icon">
+                        <img src="images/icon-bird.svg" alt="Bird">
+                    </div>
+                    <span class="pet-type-name">Birds</span>
+                </button>
+
+                <button class="pet-type-card disabled" data-pet="horses">
+                    <div class="pet-type-icon">
+                        <img src="images/icon-horse.svg" alt="Horse">
+                    </div>
+                    <span class="pet-type-name">Horses</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Screen 3: Photo Options -->
+        <div id="photo-options-page" class="page">
+            <h1 class="headline">We are nearly there</h1>
+            <p class="subtext">Now we know what pet type you are after lets<br>find the pet that matches you!</p>
+
+            <div class="selected-pet-display">
+                <div class="selected-pet-icon">
+                    <img src="images/icon-dog.svg" alt="Dog">
+                </div>
+                <span class="selected-pet-name">Dog</span>
+                <button class="change-pet-btn" id="change-pet-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                    </svg>
+                    Change pet type
+                </button>
+            </div>
+
+            <div class="divider"></div>
+
+            <p class="photo-prompt">Take or upload a photo to find your<br>perfect partner</p>
+
+            <button class="photo-action-btn" id="take-photo-btn">
+                <svg viewBox="0 0 24 24">
+                    <rect x="2" y="6" width="20" height="14" rx="2"/>
+                    <circle cx="12" cy="13" r="4"/>
+                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+                Take a photo
+            </button>
+
+            <button class="photo-action-btn" id="upload-photo-btn">
+                <svg viewBox="0 0 24 24">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                Upload a photo
+            </button>
+
+            <input type="file" id="file-input" accept="image/*">
+        </div>
+
+        <!-- Screen 4: Camera (fullscreen overlay) -->
+        <div id="camera-page" class="page">
+            <div class="camera-header">
+                <button class="close-camera" id="close-camera">&times;</button>
+            </div>
+            <div id="video-container">
+                <video id="camera-video" autoplay playsinline></video>
+                <canvas id="camera-canvas"></canvas>
+            </div>
+            <div class="camera-controls" id="camera-controls">
+                <button class="capture-btn" id="capture-btn"></button>
+                <button class="switch-camera" id="switch-camera">&#x21bb;</button>
+            </div>
+        </div>
+
+        <!-- Screen 5: Photo Preview -->
+        <div id="preview-page" class="page">
+            <h1 class="headline">Are you ready to find<br>your pet-a-like?</h1>
+            <p class="subtext">we will use AI technology to scan and find<br>the perfect pet-alikey we have for adoption</p>
+
+            <div class="preview-container">
+                <svg class="paw-print paw-svg" viewBox="0 0 50 50">
+                    <ellipse cx="25" cy="35" rx="12" ry="10"/>
+                    <ellipse cx="12" cy="20" rx="6" ry="8"/>
+                    <ellipse cx="25" cy="12" rx="5" ry="7"/>
+                    <ellipse cx="38" cy="20" rx="6" ry="8"/>
+                </svg>
+                <img id="preview-photo" class="preview-photo" alt="Your photo">
+                <div class="looking-good-badge">Looking good!</div>
+            </div>
+
+            <div class="preview-actions">
+                <button class="retake-btn" id="retake-btn">Retake</button>
+                <button class="submit-btn" id="submit-btn">Submit</button>
+            </div>
+        </div>
+
+        <!-- Screen 6: Loading -->
+        <div id="loading-page" class="page">
+            <div class="floating-pets">
+                <!-- Top row -->
+                <img src="images/pet-5.png" alt="" class="floating-pet">
+                <img src="images/pet-4.png" alt="" class="floating-pet">
+                <img src="images/pet-6.png" alt="" class="floating-pet">
+                <!-- Second row -->
+                <img src="images/pet-2.png" alt="" class="floating-pet">
+                <img src="images/pet-3.png" alt="" class="floating-pet">
+                <img src="images/pet-1.png" alt="" class="floating-pet">
+                <!-- Third row -->
+                <img src="images/pet-8.png" alt="" class="floating-pet">
+                <img src="images/pet-7.png" alt="" class="floating-pet">
+                <img src="images/pet-9.png" alt="" class="floating-pet">
+                <!-- Bottom rows (repeat for more coverage) -->
+                <img src="images/pet-1.png" alt="" class="floating-pet">
+                <img src="images/pet-5.png" alt="" class="floating-pet">
+                <img src="images/pet-3.png" alt="" class="floating-pet">
+                <img src="images/pet-8.png" alt="" class="floating-pet">
+                <img src="images/pet-9.png" alt="" class="floating-pet">
+                <img src="images/pet-2.png" alt="" class="floating-pet">
+                <img src="images/pet-6.png" alt="" class="floating-pet">
+                <img src="images/pet-4.png" alt="" class="floating-pet">
+                <img src="images/pet-7.png" alt="" class="floating-pet">
+            </div>
+            <div class="loading-content">
+                <h1 class="headline">Searching for pets</h1>
+                <p class="subtext">we will use AI technology to scan and find the perfect pet-alikey we have for adoption</p>
+            </div>
+        </div>
+
+        <!-- Screens 7 & 8: Results -->
+        <div id="results-page" class="page">
+            <nav class="tab-nav">
+                <button class="tab-btn" data-tab="matches">Matches</button>
+                <button class="tab-btn active" data-tab="overview">Overview</button>
+                <button class="tab-btn" data-tab="restart">Restart</button>
+            </nav>
+
+            <div class="results-content">
+                <!-- Overview Tab (Screen 7) -->
+                <div class="overview-section active" data-section="overview">
+                    <div class="results-intro">
+                        <h2 class="headline">Your Pet-a-likey</h2>
+                        <p class="subtext">We based our facial recognition on the following<br>categories to match you and <span id="dog-name-intro">Rufus</span></p>
+                    </div>
+
+                    <div class="comparison-photos">
+                        <img id="user-photo-result" class="comparison-photo" alt="Your photo">
+                        <img id="dog-photo-comparison" class="comparison-photo" alt="Matched dog">
+                    </div>
+
+                    <div class="match-scores">
+                        <div class="score-row">
+                            <span class="score-label">Appearance</span>
+                            <div class="score-bar">
+                                <div class="score-fill" id="appearance-score" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="score-row">
+                            <span class="score-label">Expression</span>
+                            <div class="score-bar">
+                                <div class="score-fill" id="expression-score" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="score-row">
+                            <span class="score-label">Character</span>
+                            <div class="score-bar">
+                                <div class="score-fill" id="character-score" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <p class="score-note">*Results are estimations and not absolutes</p>
+                    </div>
+
+                    <div class="pet-result-card">
+                        <div class="top-match-badge">
+                            <span>&#9734;</span> Top Match
+                        </div>
+                        <img id="dog-image" class="pet-result-image" alt="Matched dog">
+                        <h2 id="dog-name" class="pet-result-name">Rufus</h2>
+                        <p id="dog-details" class="pet-result-details">English Bulldog &middot; 5 Yrs &middot; Male</p>
+                        <p id="dog-location" class="pet-result-location">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                <circle cx="12" cy="10" r="3"/>
+                            </svg>
+                            West Hollywood, CA
+                        </p>
+                        <p id="dog-description" class="pet-result-description">
+                            Rufus is a 5-year-old male bulldog with a heart as big as his adorable wrinkles!
+                        </p>
+                        <div class="pet-result-actions">
+                            <button class="share-btn">&#8599;</button>
+                            <button class="more-about-btn" id="more-about-btn">More about <span id="dog-name-btn">Rufus</span></button>
+                            <button class="heart-btn">&#9825;</button>
+                        </div>
+                    </div>
+
+                    <div class="adoption-guide">
+                        <img src="images/adoption-guide.png" alt="Adoption Guidebook" class="guide-image">
+                        <h3>Not sure where to start in your adoption journey?</h3>
+                        <p><strong>Check out our adoption guidebook</strong> – a free resource that includes everything from a printable checklist, shelter interview tips, how to pick the right pet, and even food and treat offers.</p>
+                        <button class="download-btn">Download the PDF</button>
+                    </div>
+                </div>
+
+                <!-- Matches Tab -->
+                <div class="overview-section" data-section="matches">
+                    <div class="matches-intro">
+                        <h2 class="headline">Your extra Pet-a-likeys</h2>
+                        <p class="subtext">Explore other pets we matched you too</p>
+                    </div>
+                    <div class="matches-list" id="matches-list">
+                        <!-- Matches will be populated by JavaScript -->
+                    </div>
+                    <p class="no-matches-message" id="no-matches-message" style="display: none;">
+                        No matches yet. Take a photo to find your pet-a-likey!
+                    </p>
+                </div>
+
+                <!-- Restart Tab (Screen 8) -->
+                <div class="restart-section" data-section="restart">
+                    <h1 class="headline">Would you like to<br>start again?</h1>
+                    <p class="subtext">To refine your search you can change your photo<br>and pet type below. Once you've finished<br>updating click confirm to find a new pet-a-likey!</p>
+
+                    <div class="current-selection">
+                        <div class="selected-pet-icon" style="margin: 0 auto 16px;">
+                            <img src="images/icon-dog.svg" alt="Dog">
+                        </div>
+                        <span class="selected-pet-name">Dog</span>
+                        <button class="change-pet-btn" id="change-pet-btn-restart">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                            </svg>
+                            Change pet type
+                        </button>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <p class="photo-prompt">Take or upload a photo to find your<br>perfect partner</p>
+
+                    <div class="restart-photo-container">
+                        <img id="restart-photo" class="restart-photo" alt="Your photo">
+                        <button class="remove-photo-btn" id="remove-photo-btn">&times;</button>
+                    </div>
+
+                    <div class="restart-actions">
+                        <button class="photo-action-btn" id="retake-photo-btn">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="2" y="6" width="20" height="14" rx="2"/>
+                                <circle cx="12" cy="13" r="4"/>
+                                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            </svg>
+                            Take a new photo
+                        </button>
+
+                        <button class="photo-action-btn" id="reupload-photo-btn">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                            Upload a new photo
+                        </button>
+
+                        <button class="confirm-btn" id="confirm-changes-btn">Confirm Changes</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="footer">
+                <div class="newsletter">
+                    <h4>Sign up for our newsletter</h4>
+                    <form class="newsletter-form">
+                        <input type="email" placeholder="Enter e-mail">
+                        <button type="submit">Send</button>
+                    </form>
+                    <p class="newsletter-disclaimer">
+                        I'd like to hear from Adopt a Pet and other <a href="#">Mars Petcare brands</a>, with special offers, the latest about products, and more. Must be 18 or older to subscribe and may unsubscribe at any time. We may use your data for research to improve our offerings; see our <a href="#">Privacy Policy</a> for details about how we use your data.
+                    </p>
+                </div>
+
+                <div class="social-links">
+                    <a href="#" class="social-link" aria-label="Facebook">
+                        <svg width="10" height="20" viewBox="0 0 10 20" fill="currentColor"><path d="M6.5 7H10V10H6.5V20H3V10H0V7H3V5.5C3 2.5 4 0 7.5 0H10V3H8C6.9 3 6.5 3.4 6.5 4.5V7Z"/></svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="Twitter">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="Pinterest">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12c0 5 3.1 9.3 7.5 11-.1-.9-.2-2.4 0-3.4.2-.9 1.4-6 1.4-6s-.4-.7-.4-1.8c0-1.7 1-3 2.2-3 1 0 1.5.8 1.5 1.7 0 1-.7 2.6-1 4-.3 1.2.6 2.2 1.8 2.2 2.1 0 3.8-2.2 3.8-5.5 0-2.9-2.1-4.9-5-4.9-3.4 0-5.5 2.6-5.5 5.2 0 1 .4 2.1.9 2.7.1.1.1.2.1.3-.1.4-.3 1.2-.3 1.4-.1.2-.2.3-.4.2-1.5-.7-2.4-2.9-2.4-4.6 0-3.8 2.8-7.3 8-7.3 4.2 0 7.5 3 7.5 7 0 4.2-2.6 7.5-6.3 7.5-1.2 0-2.4-.6-2.8-1.4l-.8 3c-.3 1.1-.9 2.2-1.4 3.1 1.1.3 2.2.5 3.4.5 6.6 0 12-5.4 12-12S18.6 0 12 0z"/></svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="YouTube">
+                        <svg width="20" height="14" viewBox="0 0 20 14" fill="currentColor"><path d="M19.6 2.2C19.4 1.4 18.7.7 18 .5 16.4 0 10 0 10 0S3.6 0 2 .5C1.2.7.5 1.4.4 2.2 0 3.8 0 7 0 7s0 3.2.4 4.8c.2.8.9 1.5 1.6 1.7C3.6 14 10 14 10 14s6.4 0 8-.5c.8-.2 1.4-.9 1.6-1.7.4-1.6.4-4.8.4-4.8s0-3.2-.4-4.8zM8 10V4l5.2 3L8 10z"/></svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="Instagram">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 1.8.2 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1.1.4 2.2.1 1.3.1 1.6.1 4.8s0 3.6-.1 4.9c-.1 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1.1.4-2.2.4-1.3.1-1.6.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-1.8-.2-2.2-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.4-.4-1.1-.4-2.2-.1-1.3-.1-1.6-.1-4.9s0-3.6.1-4.9c.1-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1.1-.4 2.2-.4 1.3 0 1.6-.1 4.9-.1zM12 0C8.7 0 8.3 0 7 .1 5.7.1 4.8.3 4 .6c-.9.3-1.6.8-2.3 1.5C1 2.8.5 3.5.2 4.4c-.3.8-.5 1.7-.5 3C-.3 8.3 0 8.7 0 12s0 3.7.1 5c0 1.3.2 2.2.5 3 .3.9.8 1.6 1.5 2.3.7.7 1.4 1.2 2.3 1.5.8.3 1.7.5 3 .5 1.3.1 1.7.1 5 .1s3.7 0 5-.1c1.3 0 2.2-.2 3-.5.9-.3 1.6-.8 2.3-1.5.7-.7 1.2-1.4 1.5-2.3.3-.8.5-1.7.5-3 .1-1.3.1-1.7.1-5s0-3.7-.1-5c0-1.3-.2-2.2-.5-3-.3-.9-.8-1.6-1.5-2.3-.7-.7-1.4-1.2-2.3-1.5-.8-.3-1.7-.5-3-.5C15.7 0 15.3 0 12 0zm0 5.8c-3.4 0-6.2 2.8-6.2 6.2s2.8 6.2 6.2 6.2 6.2-2.8 6.2-6.2-2.8-6.2-6.2-6.2zM12 16c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4zm6.4-11.8c-.8 0-1.4.6-1.4 1.4 0 .8.6 1.4 1.4 1.4.8 0 1.4-.6 1.4-1.4 0-.8-.6-1.4-1.4-1.4z"/></svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="LinkedIn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.4 20.5h-3.6v-5.6c0-1.3 0-3-1.9-3-1.9 0-2.1 1.4-2.1 2.9v5.7H9.2V9h3.4v1.6c.5-.9 1.6-1.9 3.4-1.9 3.6 0 4.3 2.4 4.3 5.5v6.3zM5.3 7.4c-1.1 0-2.1-.9-2.1-2.1 0-1.1.9-2.1 2.1-2.1 1.1 0 2.1.9 2.1 2.1 0 1.2-.9 2.1-2.1 2.1zm1.8 13.1H3.5V9h3.6v11.5zM22.2 0H1.8C.8 0 0 .8 0 1.7v20.6c0 .9.8 1.7 1.8 1.7h20.4c1 0 1.8-.8 1.8-1.7V1.7c0-.9-.8-1.7-1.8-1.7z"/></svg>
+                    </a>
+                </div>
+
+                <nav class="footer-links">
+                    <a href="#" class="footer-link">Pets</a>
+                    <a href="#" class="footer-link">Get Involved</a>
+                    <a href="#" class="footer-link">Shelter/Rescue</a>
+                    <a href="#" class="footer-link">Our Organization</a>
+                    <a href="#" class="footer-link">Information</a>
+                </nav>
+
+                <div class="footer-logo">
+                    <a href="#" onclick="showPage('intro'); return false;">
+                        <img src="images/logo.svg" alt="Adopt a Pet">
+                    </a>
+                </div>
+
+                <p class="footer-copyright">
+                    &copy; 2026, Kinship Partners, Inc. an affiliate of Mars Incorporated
+                </p>
+
+                <div class="footer-partners">
+                    <div class="partner-row">
+                        <span>Our sister brand</span>
+                        <img src="images/logo-kinship.svg" alt="Kinship" class="partner-logo kinship-logo">
+                    </div>
+                    <div class="partner-row">
+                        <span>Our partners</span>
+                        <img src="images/logo-petsmart.svg" alt="PetSmart" class="partner-logo">
+                        <img src="images/logo-pedigree.svg" alt="Pedigree" class="partner-logo">
+                        <img src="images/logo-zoetis.svg" alt="Zoetis" class="partner-logo">
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
