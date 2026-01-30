@@ -280,7 +280,7 @@ app.get('/', (req, res) => {
 // Start server
 bootstrap()
   .then(() => {
-    app.listen(config.port, () => {
+    app.listen(config.port, '0.0.0.0', () => {
       console.log(`Pet-a-Likey API running on port ${config.port}`);
     });
   })
