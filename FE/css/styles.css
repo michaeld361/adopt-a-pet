@@ -301,8 +301,6 @@ body {
   font-weight: 500;
   cursor: pointer;
   margin-bottom: 30px;
-  position: relative;
-  z-index: 9;
 }
 
 .hero-container {
@@ -925,6 +923,17 @@ body {
    ============================================ */
 #results-page {
   background: var(--color-cream);
+}
+
+/* Fix for mobile - account for sticky header */
+@media (max-width: 499px) {
+  #results-page {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding-top: 52px;
+  }
 }
 
 .results-content {
