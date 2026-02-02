@@ -4,27 +4,27 @@
 
 /* Font Face Declarations */
 @font-face {
-    font-family: 'Helvetica Now Display';
-    src: url('../fonts/HelveticaNowDisplay-Regular.woff2') format('woff2');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
+  font-family: 'Helvetica Now Display';
+  src: url('../fonts/HelveticaNowDisplay-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-    font-family: 'Helvetica Now Display';
-    src: url('../fonts/HelveticaNowDisplay-Medium.woff2') format('woff2');
-    font-weight: 500;
-    font-style: normal;
-    font-display: swap;
+  font-family: 'Helvetica Now Display';
+  src: url('../fonts/HelveticaNowDisplay-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-    font-family: 'Helvetica Now Display';
-    src: url('../fonts/HelveticaNowDisplay-Bold.woff2') format('woff2');
-    font-weight: 700;
-    font-style: normal;
-    font-display: swap;
+  font-family: 'Helvetica Now Display';
+  src: url('../fonts/HelveticaNowDisplay-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
 }
 
 /* CSS Variables */
@@ -61,6 +61,7 @@
 html,
 body {
   height: 100%;
+  overscroll-behavior: none;
 }
 
 body {
@@ -70,6 +71,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  overscroll-behavior: none;
 }
 
 .headline {
@@ -100,8 +102,9 @@ body {
 
   .phone-frame {
     max-width: 390px;
-    min-height: 844px;
-    height: 844px;
+    min-height: 780px;
+    height: 780px;
+    max-height: calc(100vh - 80px);
     border-radius: 50px;
     box-shadow:
       0 0 0 12px #1a1a1a,
@@ -109,6 +112,7 @@ body {
       0 25px 50px rgba(0, 0, 0, 0.3);
     overflow-y: auto;
     overflow-x: hidden;
+    overscroll-behavior: contain;
   }
 
   .phone-frame::before {
@@ -197,7 +201,8 @@ body {
   display: none;
   min-height: calc(100vh - 60px);
   background: var(--color-cream);
-  padding-top: 16px; /* Account for header height on mobile */
+  padding-top: 16px;
+  /* Account for header height on mobile */
 }
 
 .page.active {
@@ -265,7 +270,8 @@ body {
 
 #intro-page .headline {
   font-size: 58px;
-  line-height: 64px; /* 100% */
+  line-height: 64px;
+  /* 100% */
   margin: 40px 0 20px;
 }
 
@@ -277,11 +283,11 @@ body {
 }
 
 .intro-buttons {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 30px;
 }
 
 .start-btn {
@@ -301,7 +307,8 @@ body {
   width: 100%;
   bottom: 0;
   left: 0;
-  height: 400px; /* Set a fixed height for the slideshow */
+  height: 400px;
+  /* Set a fixed height for the slideshow */
   overflow: hidden;
   display: flex;
 }
@@ -638,9 +645,9 @@ body {
 }
 
 @media (max-width: 499px) {
-    #camera-page {
-        position: fixed;
-    }
+  #camera-page {
+    position: fixed;
+  }
 }
 
 .camera-header {
@@ -880,15 +887,19 @@ body {
 .floating-pet.style-1 {
   border-radius: 30% 70% 70% 30% / 60% 40% 60% 40%;
 }
+
 .floating-pet.style-2 {
   border-radius: 16px;
 }
+
 .floating-pet.style-3 {
   border-radius: 70% 30% 30% 70% / 40% 60% 40% 60%;
 }
+
 .floating-pet.style-4 {
   border-radius: 50%;
 }
+
 .floating-pet.style-5 {
   border-radius: 40% 60% 60% 40% / 50% 50% 50% 50%;
 }
@@ -1581,6 +1592,7 @@ body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1591,6 +1603,7 @@ body {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -1601,6 +1614,7 @@ body {
     opacity: 0;
     transform: translateX(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -1612,6 +1626,7 @@ body {
     opacity: 0;
     transform: translateX(20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -1623,6 +1638,7 @@ body {
     opacity: 0;
     transform: scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: scale(1);

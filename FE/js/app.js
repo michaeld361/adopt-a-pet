@@ -32,10 +32,10 @@ function initializeSlideshow() {
     }
 
     let currentPair = 1;
-    
+
     // Create array of all pair numbers and shuffle it
-    const pairs = Array.from({length: TOTAL_PAIRS}, (_, i) => i + 1);
-    
+    const pairs = Array.from({ length: TOTAL_PAIRS }, (_, i) => i + 1);
+
     function shuffleArray(array) {
         const shuffled = [...array];
         for (let i = shuffled.length - 1; i > 0; i--) {
@@ -51,58 +51,58 @@ function initializeSlideshow() {
     function nextSlide() {
         const currentHuman = document.querySelector(`.human-image.active`);
         const currentDog = document.querySelector(`.dog-image.active`);
-        
+
         // Get next pair number
         const nextPairNumber = shuffledPairs[pairIndex];
         const nextHuman = document.querySelector(`.human-image[data-pair="${nextPairNumber}"]`);
         const nextDog = document.querySelector(`.dog-image[data-pair="${nextPairNumber}"]`);
-        
+
         if (!nextHuman || !nextDog) return;
-        
+
         // Prepare next images for sliding in
         nextHuman.classList.add('slide-in-left');
         nextDog.classList.add('slide-in-right');
-        
+
         // Start human animation first
         currentHuman.classList.add('slide-out-left');
-        
+
         // Start dog animation 500ms after human
         setTimeout(() => {
             currentDog.classList.add('slide-out-right');
         }, 500);
-        
+
         // After a small delay, start sliding in new human image
         setTimeout(() => {
             // Remove active from current human
             currentHuman.classList.remove('active');
-            
+
             // Add active to new human (triggers slide-in animation)
             nextHuman.classList.add('active');
         }, 100);
-        
+
         // Start sliding in new dog image 500ms after human
         setTimeout(() => {
             // Remove active from current dog
             currentDog.classList.remove('active');
-            
+
             // Add active to new dog (triggers slide-in animation)
             nextDog.classList.add('active');
         }, 600); // 100ms + 500ms delay
-        
+
         // Clean up classes after animations complete
         setTimeout(() => {
             currentHuman.classList.remove('slide-out-left');
             nextHuman.classList.remove('slide-in-left');
         }, 900);
-        
+
         setTimeout(() => {
             currentDog.classList.remove('slide-out-right');
             nextDog.classList.remove('slide-in-right');
         }, 1400); // 900ms + 500ms delay
-        
+
         // Move to next pair
         pairIndex = (pairIndex + 1) % TOTAL_PAIRS;
-        
+
         // Re-shuffle when we complete a cycle
         if (pairIndex === 0) {
             shuffledPairs = shuffleArray(pairs);
@@ -210,7 +210,7 @@ document.getElementById('start-btn').addEventListener('click', () => {
     showPage('petType');
 });
 
-document.getElementById('view-matches-btn').addEventListener('click', () => {
+document.getElementById('view-matches-btn')?.addEventListener('click', () => {
     renderMatchesList();
     showPage('results');
     // Switch to matches tab
@@ -805,7 +805,7 @@ function updateViewMatchesButton() {
 
 // Override showPage to control animation
 const originalShowPage = showPage;
-showPage = function(pageName) {
+showPage = function (pageName) {
     // Control floating pets animation
     if (floatingPetsAnimation) {
         if (pageName === 'loading') {
