@@ -229,48 +229,20 @@ app.post('/api/match', upload.single('photo'), async (req, res) => {
     // Sort by score descending
     allScored.sort((a, b) => b.score - a.score);
 
-    // Temperature-based weighted random sampling from top candidates
-    // This ensures variety while still preferring higher-scoring matches
-    const TEMPERATURE = 1.0; // Lower = more deterministic, Higher = more random
-    const TOP_CANDIDATES = 30; // Pool to sample from
+    // MORE AGGRESSIVE randomization for variety
+    // Since CLIP produces similar scores for human faces, we need significant randomness
+    const TEMPERATURE = 5.0; // Very high for maximum variety
+    const TOP_CANDIDATES = 100; // Large pool to sample from
     const NUM_RESULTS = 5;
 
     const candidates = allScored.slice(0, TOP_CANDIDATES);
 
-    // Convert scores to selection probabilities using softmax with temperature
-    const maxScore = candidates[0].score;
-    const weights = candidates.map(c => Math.exp((c.score - maxScore) / TEMPERATURE));
-    const totalWeight = weights.reduce((a, b) => a + b, 0);
-    const probabilities = weights.map(w => w / totalWeight);
+    // Use uniform random selection from top candidates (CLIP isn't giving us meaningful differentiation)
+    // This gives every dog in the top 100 an equal chance
+    const shuffled = [...candidates].sort(() => Math.random() - 0.5);
+    const selected = shuffled.slice(0, NUM_RESULTS);
 
-    // Weighted random selection without replacement
-    const selected = [];
-    const availableIndices = candidates.map((_, i) => i);
-
-    for (let i = 0; i < NUM_RESULTS && availableIndices.length > 0; i++) {
-      // Calculate cumulative probabilities for remaining candidates
-      let remainingProbs = availableIndices.map(idx => probabilities[idx]);
-      const remainingTotal = remainingProbs.reduce((a, b) => a + b, 0);
-      remainingProbs = remainingProbs.map(p => p / remainingTotal);
-
-      // Random selection
-      const rand = Math.random();
-      let cumulative = 0;
-      let selectedIdx = 0;
-
-      for (let j = 0; j < remainingProbs.length; j++) {
-        cumulative += remainingProbs[j];
-        if (rand <= cumulative) {
-          selectedIdx = j;
-          break;
-        }
-      }
-
-      selected.push(candidates[availableIndices[selectedIdx]]);
-      availableIndices.splice(selectedIdx, 1);
-    }
-
-    // Sort selected by score for display (best match first)
+    // Sort selected by original score for display (best of selected first)
     selected.sort((a, b) => b.score - a.score);
 
     // Clean up uploaded file
