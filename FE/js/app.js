@@ -19,6 +19,108 @@ const STORAGE_KEYS = {
 };
 
 // ============================================
+// DOGGLEGAN SLIDESHOW
+// ============================================
+
+let slideshowInterval;
+const SLIDESHOW_DURATION = 3000; // 3 seconds per pair
+const TOTAL_PAIRS = 11; // We have pairs 1-11
+
+function initializeSlideshow() {
+    if (slideshowInterval) {
+        clearInterval(slideshowInterval);
+    }
+
+    let currentPair = 1;
+    
+    // Create array of all pair numbers and shuffle it
+    const pairs = Array.from({length: TOTAL_PAIRS}, (_, i) => i + 1);
+    
+    function shuffleArray(array) {
+        const shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    }
+
+    let shuffledPairs = shuffleArray(pairs);
+    let pairIndex = 0;
+
+    function nextSlide() {
+        const currentHuman = document.querySelector(`.human-image.active`);
+        const currentDog = document.querySelector(`.dog-image.active`);
+        
+        // Get next pair number
+        const nextPairNumber = shuffledPairs[pairIndex];
+        const nextHuman = document.querySelector(`.human-image[data-pair="${nextPairNumber}"]`);
+        const nextDog = document.querySelector(`.dog-image[data-pair="${nextPairNumber}"]`);
+        
+        if (!nextHuman || !nextDog) return;
+        
+        // Prepare next images for sliding in
+        nextHuman.classList.add('slide-in-left');
+        nextDog.classList.add('slide-in-right');
+        
+        // Start human animation first
+        currentHuman.classList.add('slide-out-left');
+        
+        // Start dog animation 500ms after human
+        setTimeout(() => {
+            currentDog.classList.add('slide-out-right');
+        }, 500);
+        
+        // After a small delay, start sliding in new human image
+        setTimeout(() => {
+            // Remove active from current human
+            currentHuman.classList.remove('active');
+            
+            // Add active to new human (triggers slide-in animation)
+            nextHuman.classList.add('active');
+        }, 100);
+        
+        // Start sliding in new dog image 500ms after human
+        setTimeout(() => {
+            // Remove active from current dog
+            currentDog.classList.remove('active');
+            
+            // Add active to new dog (triggers slide-in animation)
+            nextDog.classList.add('active');
+        }, 600); // 100ms + 500ms delay
+        
+        // Clean up classes after animations complete
+        setTimeout(() => {
+            currentHuman.classList.remove('slide-out-left');
+            nextHuman.classList.remove('slide-in-left');
+        }, 900);
+        
+        setTimeout(() => {
+            currentDog.classList.remove('slide-out-right');
+            nextDog.classList.remove('slide-in-right');
+        }, 1400); // 900ms + 500ms delay
+        
+        // Move to next pair
+        pairIndex = (pairIndex + 1) % TOTAL_PAIRS;
+        
+        // Re-shuffle when we complete a cycle
+        if (pairIndex === 0) {
+            shuffledPairs = shuffleArray(pairs);
+        }
+    }
+
+    // Start slideshow
+    slideshowInterval = setInterval(nextSlide, SLIDESHOW_DURATION);
+}
+
+function stopSlideshow() {
+    if (slideshowInterval) {
+        clearInterval(slideshowInterval);
+        slideshowInterval = null;
+    }
+}
+
+// ============================================
 // LOCAL STORAGE FUNCTIONS
 // ============================================
 
@@ -179,12 +281,30 @@ document.getElementById('file-input').addEventListener('change', (e) => {
 // ============================================
 
 async function startCamera() {
+    // Check if we have previously cached camera permission
+    if (localStorage.getItem('petalikey_camera_permission') === 'granted') {
+        // Try to access camera directly
+        try {
+            const constraints = {
+                video: { facingMode: state.facingMode }
+            };
+            state.stream = await navigator.mediaDevices.getUserMedia(constraints);
+            document.getElementById('camera-video').srcObject = state.stream;
+            return;
+        } catch (err) {
+            // If it fails, clear the cache and fall through to prompt again
+            localStorage.removeItem('petalikey_camera_permission');
+        }
+    }
+    // Prompt for camera access
     try {
         const constraints = {
             video: { facingMode: state.facingMode }
         };
         state.stream = await navigator.mediaDevices.getUserMedia(constraints);
         document.getElementById('camera-video').srcObject = state.stream;
+        // If successful, cache permission
+        localStorage.setItem('petalikey_camera_permission', 'granted');
     } catch (err) {
         console.error('Error accessing camera:', err);
         alert('Unable to access camera. Please try uploading a photo instead.');
@@ -461,6 +581,20 @@ tabButtons.forEach(btn => {
     btn.addEventListener('click', () => {
         const tab = btn.dataset.tab;
 
+        if (tab === 'restart') {
+            // Instead of showing the restart section, go to pet type selection
+            showPage('petType');
+            // Optionally reset state here if needed
+            // Reset tab to overview
+            tabButtons.forEach(b => b.classList.remove('active'));
+            document.querySelector('.tab-btn[data-tab="overview"]').classList.add('active');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+            document.querySelector('[data-section="overview"]').classList.add('active');
+            return;
+        }
+
         // Update active tab
         tabButtons.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
@@ -651,8 +785,11 @@ function init() {
         floatingPetsAnimation = new FloatingPetsAnimation(floatingContainer);
     }
 
-    // Show view matches button if there are stored matches
-    updateViewMatchesButton();
+    // Initialize dogglegan slideshow
+    const slideshowContainer = document.querySelector('.dogglegan-slideshow');
+    if (slideshowContainer) {
+        initializeSlideshow();
+    }
 
     // Render any stored matches
     renderMatchesList();
@@ -669,7 +806,7 @@ function updateViewMatchesButton() {
 // Override showPage to control animation
 const originalShowPage = showPage;
 showPage = function(pageName) {
-    // Stop animation when leaving loading page
+    // Control floating pets animation
     if (floatingPetsAnimation) {
         if (pageName === 'loading') {
             floatingPetsAnimation.reset();
@@ -682,9 +819,15 @@ showPage = function(pageName) {
         }
     }
 
-    // Update view matches button when returning to intro
+    // Control dogglegan slideshow
     if (pageName === 'intro') {
-        updateViewMatchesButton();
+        // Start slideshow when showing intro page
+        setTimeout(() => {
+            initializeSlideshow();
+        }, 100);
+    } else {
+        // Stop slideshow when leaving intro page
+        stopSlideshow();
     }
 
     originalShowPage(pageName);
