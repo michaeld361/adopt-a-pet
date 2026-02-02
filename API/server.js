@@ -245,20 +245,26 @@ app.post('/api/match', upload.single('photo'), async (req, res) => {
     // Clean up on error
     try {
       await fs.rm(req.file.path);
-    } catch {}
+    } catch { }
 
     res.status(500).json({ error: 'Failed to compute match' });
   }
 });
+
+// Track initialization state
+let isReady = false;
+let initError = null;
 
 /**
  * GET /health - Health check endpoint
  */
 app.get('/health', (req, res) => {
   res.json({
-    status: 'ok',
+    status: isReady ? 'ok' : 'initializing',
+    ready: isReady,
     indexed: dogIndex.length,
-    model: config.modelName
+    model: config.modelName,
+    error: initError ? initError.message : null
   });
 });
 
@@ -269,6 +275,7 @@ app.get('/', (req, res) => {
   res.json({
     name: 'Pet-a-Likey API',
     version: '1.0.0',
+    ready: isReady,
     endpoints: {
       'POST /api/match': 'Upload a photo to find matching dogs',
       'GET /dog-images/:id': 'Get a dog image by ID',
@@ -277,14 +284,19 @@ app.get('/', (req, res) => {
   });
 });
 
-// Start server
-bootstrap()
-  .then(() => {
-    app.listen(config.port, '0.0.0.0', () => {
-      console.log(`Pet-a-Likey API running on port ${config.port}`);
+// Start server IMMEDIATELY so Render can detect the port
+app.listen(config.port, '0.0.0.0', () => {
+  console.log(`Pet-a-Likey API running on port ${config.port}`);
+  console.log('Initializing model and index in background...');
+
+  // Run bootstrap in background after port is open
+  bootstrap()
+    .then(() => {
+      isReady = true;
+      console.log('Server fully initialized and ready!');
+    })
+    .catch(err => {
+      initError = err;
+      console.error('Failed to initialize:', err);
     });
-  })
-  .catch(err => {
-    console.error('Failed to start server:', err);
-    process.exit(1);
-  });
+});
