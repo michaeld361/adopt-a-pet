@@ -301,6 +301,8 @@ body {
   font-weight: 500;
   cursor: pointer;
   margin-bottom: 30px;
+  position: relative;
+  z-index: 9;
 }
 
 .hero-container {
