@@ -218,27 +218,85 @@ app.post('/api/match', upload.single('photo'), async (req, res) => {
   try {
     const userEmbed = await embedImage(req.file.path);
 
-    const ranked = dogIndex
-      .map(dog => {
-        const dummyData = generateDummyPetData(dog.name);
-        return {
-          id: dog.id,
-          name: dog.name,
-          score: cosineSimilarity(userEmbed, dog.embedding),
-          ...dummyData
-        };
-      })
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 5);
+    // Calculate all scores first
+    const allScored = dogIndex.map(dog => ({
+      id: dog.id,
+      name: dog.name,
+      score: cosineSimilarity(userEmbed, dog.embedding),
+      ...generateDummyPetData(dog.name)
+    }));
+
+    // Sort by score descending
+    allScored.sort((a, b) => b.score - a.score);
+
+    // Temperature-based weighted random sampling from top candidates
+    // This ensures variety while still preferring higher-scoring matches
+    const TEMPERATURE = 1.0; // Lower = more deterministic, Higher = more random
+    const TOP_CANDIDATES = 30; // Pool to sample from
+    const NUM_RESULTS = 5;
+
+    const candidates = allScored.slice(0, TOP_CANDIDATES);
+
+    // Convert scores to selection probabilities using softmax with temperature
+    const maxScore = candidates[0].score;
+    const weights = candidates.map(c => Math.exp((c.score - maxScore) / TEMPERATURE));
+    const totalWeight = weights.reduce((a, b) => a + b, 0);
+    const probabilities = weights.map(w => w / totalWeight);
+
+    // Weighted random selection without replacement
+    const selected = [];
+    const availableIndices = candidates.map((_, i) => i);
+
+    for (let i = 0; i < NUM_RESULTS && availableIndices.length > 0; i++) {
+      // Calculate cumulative probabilities for remaining candidates
+      let remainingProbs = availableIndices.map(idx => probabilities[idx]);
+      const remainingTotal = remainingProbs.reduce((a, b) => a + b, 0);
+      remainingProbs = remainingProbs.map(p => p / remainingTotal);
+
+      // Random selection
+      const rand = Math.random();
+      let cumulative = 0;
+      let selectedIdx = 0;
+
+      for (let j = 0; j < remainingProbs.length; j++) {
+        cumulative += remainingProbs[j];
+        if (rand <= cumulative) {
+          selectedIdx = j;
+          break;
+        }
+      }
+
+      selected.push(candidates[availableIndices[selectedIdx]]);
+      availableIndices.splice(selectedIdx, 1);
+    }
+
+    // Sort selected by score for display (best match first)
+    selected.sort((a, b) => b.score - a.score);
 
     // Clean up uploaded file
     await fs.rm(req.file.path);
 
-    if (ranked.length > 0) {
-      console.log(`Match: ${ranked[0].name} (score: ${ranked[0].score.toFixed(4)})`);
+    // Debug logging - show score distribution
+    if (selected.length > 0) {
+      const scores = allScored.map(d => d.score);
+      const minScore = Math.min(...scores);
+      const maxScore = Math.max(...scores);
+      const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length;
+
+      console.log(`\n=== MATCH RESULTS (Temperature: ${TEMPERATURE}) ===`);
+      console.log(`Score range: ${minScore.toFixed(4)} to ${maxScore.toFixed(4)} (avg: ${avgScore.toFixed(4)})`);
+      console.log(`Selected matches:`);
+      selected.forEach((match, i) => {
+        console.log(`  ${i + 1}. ${match.name} (${match.id}) - score: ${match.score.toFixed(4)}`);
+      });
+      console.log(`Top 5 by pure score would have been:`);
+      allScored.slice(0, 5).forEach((match, i) => {
+        console.log(`  ${i + 1}. ${match.name} - score: ${match.score.toFixed(4)}`);
+      });
+      console.log(`=====================\n`);
     }
 
-    res.json({ matches: ranked });
+    res.json({ matches: selected });
   } catch (err) {
     console.error('Match error:', err);
 
